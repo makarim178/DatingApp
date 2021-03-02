@@ -1,8 +1,10 @@
-import { typeWithParameters } from '@angular/compiler/src/render3/util';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { take } from 'rxjs/operators';
 import { Message } from 'src/app/_models/message';
-import { MembersService } from 'src/app/_services/members.service';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
 import { MessageService } from 'src/app/_services/message.service';
 
 @Component({
@@ -15,21 +17,19 @@ export class MemberMessagesComponent implements OnInit {
   @Input() messages: Message[];
   @Input() username: string;
   messageContent: string;
+  user: User;
 
-  constructor(public messageService: MessageService) { }
+  constructor(public messageService: MessageService) { 
+
+  }
 
   ngOnInit(): void {
   }
 
   sendMessage() {
-    this.messageService.sendMessage(this.username, this.messageContent).subscribe(message => {
-      this.messages.push(message);
+    this.messageService.sendMessage(this.username, this.messageContent).then(() => {
       this.messageForm.reset();
     })
-    // this.messageService.sendMessage(this.username, this.messageContent)
-    //   .then(() => {
-    //   this.messageForm.reset();
-    // })
   }
   
 
