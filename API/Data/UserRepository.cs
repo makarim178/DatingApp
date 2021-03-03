@@ -22,7 +22,7 @@ namespace API.Data
             _context = context;
         }
 
-        public async Task<MemberDto> GetMemberAsyc(string username)
+        public async Task<MemberDto> GetMemberAsync(string username)
         {
             return await _context.Users
                 .Where(x => x.UserName == username)
@@ -35,19 +35,19 @@ namespace API.Data
             var query = _context.Users.AsQueryable();
 
             query = query.Where(u => u.UserName != userParams.CurrentUsername);
-            query = query.Where(u => u.Gender  == userParams.Gender);
+            query = query.Where(u => u.Gender == userParams.Gender);
 
-            var minDob = DateTime.Today.AddYears(-userParams.MaxAge-1);
+            var minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1);
             var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
 
-            query = query.Where( u => u.DateOfBirth >= minDob && u.DateOfBirth <= maxDob);
+            query = query.Where(u => u.DateOfBirth >= minDob && u.DateOfBirth <= maxDob);
 
             query = userParams.OrderBy switch
             {
-                "created" => query.OrderByDescending(u => u.Created), 
+                "created" => query.OrderByDescending(u => u.Created),
                 _ => query.OrderByDescending(u => u.LastActive)
             };
-
+            
             return await PagedList<MemberDto>.CreateAsync(query.ProjectTo<MemberDto>(_mapper
                 .ConfigurationProvider).AsNoTracking(), 
                     userParams.PageNumber, userParams.PageSize);
@@ -58,7 +58,7 @@ namespace API.Data
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<AppUser> GetuserByUsernameAsync(string username)
+        public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
             return await _context.Users
                 .Include(p => p.Photos)
@@ -69,8 +69,7 @@ namespace API.Data
         {
             return await _context.Users
                 .Where(x => x.UserName == username)
-                .Select(x => x.Gender)
-                .FirstOrDefaultAsync();
+                .Select(x => x.Gender).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<AppUser>> GetUsersAsync()

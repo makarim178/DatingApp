@@ -1,10 +1,7 @@
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { take } from 'rxjs/operators';
 import { Message } from 'src/app/_models/message';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import { MembersService } from 'src/app/_services/members.service';
 import { MessageService } from 'src/app/_services/message.service';
 
 @Component({
@@ -18,21 +15,18 @@ export class MemberMessagesComponent implements OnInit {
   @Input() messages: Message[];
   @Input() username: string;
   messageContent: string;
-  user: User;
+  loading = false;
 
-  constructor(public messageService: MessageService) { 
-
-  }
+  constructor(public messageService: MessageService) { }
 
   ngOnInit(): void {
-//    this.messageService.messageThread$.pipe(take(1)).subscribe(message => console.log(message))
   }
 
   sendMessage() {
+    this.loading = true;
     this.messageService.sendMessage(this.username, this.messageContent).then(() => {
       this.messageForm.reset();
-    })
+    }).finally(() => this.loading = false);
   }
-  
 
 }

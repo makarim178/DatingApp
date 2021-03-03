@@ -23,6 +23,9 @@ export class MessageService {
   constructor(private http: HttpClient, private busyService: BusyService) { }
 
   createHubConnection(user: User, otherUsername: string) {
+    this.busyService.busy();
+    
+    
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'message?user=' + otherUsername, {
         accessTokenFactory: () => user.token
@@ -30,9 +33,13 @@ export class MessageService {
       .withAutomaticReconnect()
       .build()
 
-    this.hubConnection.start().catch(error => console.log(error));
+    this.hubConnection.start()
+      .catch(error => console.log(error))
+      .finally(() => this.busyService.idle());
 
-    this.hubConnection.on('ReceiveMessageThread', messages => {      
+    this.hubConnection.on('ReceiveMessageThread', messages => {
+      
+      
       this.messageThreadSource.next(messages);
     })
 
@@ -58,10 +65,10 @@ export class MessageService {
 
   stopHubConnection() {
     if (this.hubConnection) {
+      this.messageThreadSource.next([]);
       this.hubConnection.stop();
     }
   }
-
 
   getMessages(pageNumber, pageSize, container) {
     let params = getPaginationHeaders(pageNumber, pageSize);
@@ -70,7 +77,7 @@ export class MessageService {
   }
 
   getMessageThread(username: string) {
-    return this.http.get<Message[]>(this.baseUrl + `messages/thread/${username}`);
+    return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username);
   }
 
   async sendMessage(username: string, content: string) {
@@ -79,6 +86,6 @@ export class MessageService {
   }
 
   deleteMessage(id: number) {
-    return this.http.delete(this.baseUrl + `messages/${id}`);
+    return this.http.delete(this.baseUrl + 'messages/' + id);
   }
 }
